@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DBAT — Vetrina</title>
+  <meta name="description" content="DBAT — Vetrina brutalist del brand. Nessuna vendita, solo esposizione."/>
+  <style>
+    :root{
+      --bg: #f7f7f7;
+      --fg: #111;
+      --muted:#777;
+      --accent:#00ff41;
+      --border: 3px;
+    }
+    html,body{height:100%}
+    body{
+      margin:0; background:var(--bg); color:var(--fg);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      line-height:1.35; letter-spacing:.2px;
+    }
+
+    .wrap{max-width:1200px; margin:0 auto; padding:24px;}
+    header{position:sticky; top:0; z-index:10; background:var(--bg); border-bottom:var(--border) solid var(--fg)}
+    header .bar{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 0; position: relative;}
+    .logo{font-size:28px; font-weight:900; letter-spacing:2px; padding:2px 8px; border:var(--border) solid var(--fg); box-shadow:6px 6px 0 #000; text-transform:uppercase}
+    nav{display:flex; gap:10px}
+    nav a{
+      color:var(--fg); text-decoration:none; border:var(--border) solid var(--fg); padding:8px 12px; box-shadow:4px 4px 0 #000;
+      transition: all 0.3s ease;
+    }
+    nav a:hover{background:lime !important; transform:translate(-2px,-2px)}
+
+    .menu-toggle { display: none; }
+    nav.open { display: flex !important; flex-direction: column; width: 100%; background: var(--bg); position: relative; top: 0; left: 0; }
+
+    .marquee{
+      border-left:var(--border) solid var(--fg);
+      border-right:var(--border) solid var(--fg);
+      border-bottom:var(--border) solid var(--fg);
+      padding:8px; overflow:hidden; white-space:nowrap; font-weight:700; text-transform:uppercase;
+      background:#fff;
+    }
+    .marquee span{display:inline-block; padding-left:100%; animation:scroll 18s linear infinite}
+    @keyframes scroll{to{transform:translateX(-100%)}}
+
+    .carousel{margin-top:28px; border:var(--border) solid var(--fg); box-shadow:8px 8px 0 #000; background:#fff}
+    .carousel-viewport{position:relative; overflow:hidden}
+    .slides{display:flex; transition:transform .45s cubic-bezier(.2,.8,.2,1)}
+    .slide{min-width:100%; display:grid; grid-template-columns: 1fr; place-items:center; aspect-ratio: 16 / 9; background:#fafafa}
+    .slide img{max-width:100%; max-height:100%; object-fit:contain}
+
+    .caption{position:absolute; left:12px; bottom:12px; background:var(--fg); color:#fff; padding:8px 12px; border:var(--border) solid #fff; box-shadow:6px 6px 0 #000; font-weight:900; text-transform:uppercase; letter-spacing:.5px}
+
+    .controls{display:flex; align-items:center; justify-content:space-between; gap:8px; border-top:var(--border) solid var(--fg); background:#fff}
+    .controls .group{display:flex; gap:8px}
+    .btn{appearance:none; background:#fff; color:var(--fg); border:var(--border) solid var(--fg); padding:10px 14px; font-weight:800; text-transform:uppercase; cursor:pointer; box-shadow:4px 4px 0 #000; transition: all 0.3s ease;}
+    .btn:hover{background:lime; transform:translate(-2px,-2px)}
+
+    .dots{display:flex; gap:8px; padding:12px}
+    .dot{width:16px; height:16px; border-radius:0; border:var(--border) solid var(--fg); background:#fff; cursor:pointer; transition: background 0.3s ease;}
+    .dot:hover{background:lime}
+    .dot[aria-current="true"]{background:var(--accent);}
+
+    section{margin-top:40px}
+    h2{font-size:28px; margin:0 0 12px 0; text-transform:uppercase}
+    .catalog{display:grid; gap:16px; grid-template-columns: repeat(1, minmax(0,1fr));}
+    @media (min-width:720px){.catalog{grid-template-columns: repeat(2, minmax(0,1fr));}}
+    @media (min-width:980px){.catalog{grid-template-columns: repeat(3, minmax(0,1fr));}}
+
+    .card{border:var(--border) solid var(--fg); background:#fff; display:flex; flex-direction:column; box-shadow:6px 6px 0 #000}
+    .card .media{aspect-ratio:1/1; display:grid; place-items:center; border-bottom:var(--border) solid var(--fg)}
+    .card img{max-width:100%; max-height:100%; object-fit:contain; transition:opacity 0.5s ease;}
+    .card .meta{padding:12px}
+    .title{font-size:20px; font-weight:900; text-transform:uppercase}
+    .nosale{margin-top:8px; display:inline-block; font-size:12px; color:#fff; background:#111; padding:6px 8px; border:var(--border) solid #fff}
+
+    footer{margin-top:48px; border-top:var(--border) solid var(--fg); padding:18px 0; color:var(--muted); font-size:14px}
+    .no-buy{
+      display:inline-flex; align-items:center; gap:8px; border:var(--border) dashed var(--fg);
+      padding:8px 12px; font-weight:900; text-transform:uppercase; background:#fff; box-shadow:6px 6px 0 #000
+    }
+    .blink{display:inline-block; width:10px; height:18px; background:var(--fg); animation:blink 1s steps(1) infinite}
+    @keyframes blink{50%{opacity:0}}
+
+    .sr-only{position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0}
+
+    /* Responsive tweaks */
+    @media (max-width: 600px) {
+      header .bar {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }
+      nav {
+        display: none;
+      }
+      nav.open {
+        display: flex !important;
+        flex-direction: column;
+        width: 100%;
+        background: var(--bg);
+        position: relative;
+        margin-top: 10px;
+      }
+      nav a {
+        width: 100%;
+        text-align: center;
+        font-size: 16px;
+        padding: 12px;
+      }
+      .menu-toggle {
+        display: block;
+        border: var(--border) solid var(--fg);
+        padding: 8px 12px;
+        font-weight: 900;
+        cursor: pointer;
+        background: #fff;
+        box-shadow: 4px 4px 0 #000;
+        margin-left: auto;
+      }
+
+      .carousel .slide {
+        aspect-ratio: 1 / 1; /* più quadrato su mobile */
+      }
+
+      /* nascondo i quadratini del carosello */
+      .dots {
+        display: none;
+      }
+
+      h2 {
+        font-size: 22px;
+      }
+      .title {
+        font-size: 16px;
+      }
+      body {
+        font-size: 15px;
+        padding: 0 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap bar">
+      <div class="logo" aria-label="DBAT – brand">DBAT</div>
+      <button class="menu-toggle" onclick="toggleMenu()">☰ Menu</button>
+    </div>
+    <nav>
+      <a href="#vetrina">Vetrina</a>
+      <a href="#catalogo">Catalogo</a>
+      <a href="#info">Info</a>
+      <a href="#contatti">Contatti</a>
+    </nav>
+    <div class="marquee" aria-hidden="true"><span>DBAT — nessuna vendita online • vetrina ufficiale • estetica brutalist • DBAT — nessuna vendita online • vetrina ufficiale • estetica brutalist • </span></div>
+  </header>
+
+  <main class="wrap">
+    <section id="vetrina" class="carousel" aria-label="Carosello prodotti">
+      <div class="carousel-viewport">
+        <div class="slides" id="slides" role="list"></div>
+        <div class="caption" id="caption">&nbsp;</div>
+      </div>
+      <div class="controls">
+        <div class="group" style="padding:12px">
+          <button class="btn" id="prev" aria-label="Slide precedente">◀︎ Prev</button>
+          <button class="btn" id="next" aria-label="Slide successiva">Next ▶︎</button>
+        </div>
+        <div class="dots" id="dots" aria-label="Indicatori del carosello"></div>
+        <div class="group" style="padding:12px">
+          <button class="btn" id="toggleAuto" aria-pressed="false">Auto ▷</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="catalogo">
+      <h2>Catalogo</h2>
+      <div class="no-buy" title="Nessuna vendita online">
+        <span>Esposizione soltanto</span><span class="blink" aria-hidden="true"></span>
+      </div>
+      <div class="catalog" id="catalog"></div>
+    </section>
+
+    <section id="info">
+      <h2>Info</h2>
+      <p>DBAT è un brand di abbigliamento minimal-brutalist. Questa pagina funge da vetrina digitale. Nessun acquisto è possibile qui. Per collaborazioni o wholesale, usa i contatti qui sotto.</p>
+    </section>
+
+    <section id="contatti">
+      <h2>Contatti</h2>
+      <p>Email: <a href="mailto:alessandrotaranitno4@gmail.com" aria-label="email di contatto">alessandrotaranitno4@gmail.com</a></p>
+      <p>Instagram: <a href="#" aria-label="profilo Instagram DBAT" onclick="alert('Link disattivato in demo');return false;">@aletarantinoo</a></p>
+    </section>
+
+    <footer>
+      © <span id="year"></span> DBAT — Vetrina. Tutti i diritti riservati. Nessun sistema di pagamento è attivo.
+    </footer>
+  </main>
+
+  <script>
+    function toggleMenu(){
+      const nav = document.querySelector('nav');
+      nav.classList.toggle('open');
+    }
+
+    document.querySelectorAll('nav a').forEach(link => {
+      link.addEventListener('click', () => {
+        document.querySelector('nav').classList.remove('open');
+      });
+    });
+
+    const PRODUCTS = [
+      { id: '10-decimi', title: 'DBAT // 10 Decimi', images: ["img/front_black_special.jpg","img/back_black_special.jpg"] },
+      { id: 'comprensibile', title: 'DBAT // Comprensibile', images: ["img/black.jpg","img/sand.jpg"] },
+      { id: 'aura', title: 'DBAT // Aura', images: ["img/brown4.jpg","img/black4.jpg","img/lollipop4.jpg","img/prince4.jpg","img/clorofill4.jpg","img/agua4.jpg"] }
+    ];
+
+    const slidesEl = document.getElementById('slides');
+    const captionEl = document.getElementById('caption');
+    const dotsEl = document.getElementById('dots');
+    const prevBtn = document.getElementById('prev');
+    const nextBtn = document.getElementById('next');
+    const toggleBtn = document.getElementById('toggleAuto');
+
+    let index = 0;
+    let auto = false;
+    let autoTimer = null;
+    const allSlides = [];
+
+    PRODUCTS.forEach((p)=>{
+      p.images.forEach(img=>{
+        const li = document.createElement('div');
+        li.className='slide';
+        li.setAttribute('role','listitem');
+        li.innerHTML = `<img src="${img}" alt="T-shirt ${p.title}">`;
+        slidesEl.appendChild(li);
+        allSlides.push({title:p.title});
+      });
+    });
+
+    allSlides.forEach((s,i)=>{
+      const dot = document.createElement('button');
+      dot.className='dot';
+      dot.setAttribute('aria-label', `Vai alla slide ${i+1}: ${s.title}`);
+      dot.addEventListener('click',()=>go(i));
+      dotsEl.appendChild(dot);
+    });
+
+    function update(){
+      slidesEl.style.transform = `translateX(-${index*100}%)`;
+      captionEl.textContent = allSlides[index].title;
+      [...dotsEl.children].forEach((d,i)=>d.setAttribute('aria-current', i===index?'true':'false'));
+    }
+
+    function go(i){ index = (i+allSlides.length)%allSlides.length; update(); }
+    function prev(){ go(index-1) }
+    function next(){ go(index+1) }
+
+    function startAuto(){
+      auto = true; toggleBtn.setAttribute('aria-pressed','true'); toggleBtn.textContent='Auto ❚❚';
+      if(autoTimer) clearInterval(autoTimer);
+      autoTimer = setInterval(()=>{ next(); }, 3000);
+    }
+
+    function stopAuto(){
+      auto = false; toggleBtn.setAttribute('aria-pressed','false'); toggleBtn.textContent='Auto ▷';
+      if(autoTimer) clearInterval(autoTimer);
+    }
+
+    prevBtn.addEventListener('click', prev);
+    nextBtn.addEventListener('click', next);
+    toggleBtn.addEventListener('click', ()=> auto ? stopAuto() : startAuto());
+
+    update();
+    startAuto();
+
+    const catalogEl = document.getElementById('catalog');
+    PRODUCTS.forEach(p=>{
+      const card = document.createElement('article');
+      card.className='card';
+      const media = document.createElement('div');
+      media.className = "media";
+      const imgEl = document.createElement('img');
+      imgEl.src = p.images[0];
+      media.appendChild(imgEl);
+
+      let ci = 0;
+      setInterval(()=>{
+        ci = (ci+1)%p.images.length;
+        imgEl.src = p.images[ci];
+      }, 2500);
+
+      card.innerHTML = `
+        <div class="meta">
+          <div class="title">${p.title}</div>
+          <span class="nosale" aria-label="Solo vetrina">Nessuna vendita online</span>
+        </div>`;
+      card.prepend(media);
+      catalogEl.appendChild(card);
+    });
+
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
